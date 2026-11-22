@@ -69,6 +69,8 @@ button.block:disabled{opacity:1;cursor:default}
 <section id="game" hidden aria-label="もんだい">
 <div class="toolbar"><span id="progress"></span><button id="home">はじめに もどる</button></div>
 <h2 class="equation" id="equation" tabindex="-1"><span id="expression"></span> <span id="blank">？</span></h2>
+<p>□に はいる かずを えらぼう。</p>
+<div id="keys" role="group" aria-label="こたえを えらぶ"></div>
 <details id="hint">
 <summary>ブロックで ヒント</summary>
 <div id="blocks">
@@ -85,8 +87,6 @@ button.block:disabled{opacity:1;cursor:default}
 <p id="hintText" aria-live="polite"></p>
 <button id="resetBlocks" disabled>ぜんぶ もどす</button>
 </details>
-<p>□に はいる かずを えらぼう。</p>
-<div id="keys" role="group" aria-label="こたえを えらぶ"></div>
 <p id="feedback" role="status"></p>
 <button id="next" class="primary" hidden>つぎの もんだい</button>
 </section>
