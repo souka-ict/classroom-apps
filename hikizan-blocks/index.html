@@ -152,7 +152,6 @@ function next() {
   get('blank').textContent = '？';
   get('feedback').textContent = '';
   get('next').hidden = true;
-  get('hint').hidden = mode === 'challenge';
   get('hint').open = false;
   keys.forEach(button => button.disabled = false);
   renderBlocks();
