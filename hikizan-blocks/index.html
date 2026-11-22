@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10から ひこう！</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#edf8f3;color:#163e35;font:700 1rem/1.6 system-ui,sans-serif}
+header{padding:1.25rem 1rem;text-align:center}
+header p{margin:0;color:#396357}
+h1{font-size:clamp(2rem,7vw,3.4rem);margin:.1em 0;line-height:1.25}
+main{width:min(100% - 1.5rem,40rem);margin:0 auto 2rem}
+section{background:white;border:1px solid #bbded0;border-radius:1.75rem;padding:clamp(1rem,4vw,2rem);box-shadow:0 7px 0 #cce7db;text-align:center}
+h2{margin:.25rem 0;font-size:clamp(1.3rem,5vw,1.9rem)}
+p{margin:.5rem 0 1rem}
+button{cursor:pointer;font:inherit;color:inherit;border:2px solid #b4d8ca;border-radius:1rem;background:#eff9f4;min-height:3rem;padding:.45rem .8rem;touch-action:manipulation}
+button:hover{background:#d9f0e5}
+button:focus-visible,summary:focus-visible{outline:3px solid #8855c6;outline-offset:3px}
+button.primary{background:#12644e;color:white;border-color:#12644e}
+button.primary:hover{background:#084b39}
+button:disabled{cursor:default;opacity:.55}
+.menu{display:grid;gap:.7rem;max-width:21rem;margin:1.25rem auto 0}
+.menu button{font-size:1.2rem}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.equation{font-size:clamp(2.4rem,10vw,4.6rem);line-height:1.4;margin:.45rem 0}
+#blank{display:inline-block;min-width:1.25em;background:#fff1b8;border-radius:.24em}
+#keys{display:grid;grid-template-columns:repeat(9,1fr);gap:.35rem;margin-top:.75rem}
+#keys button{padding:.2em;font-size:1.6rem}
+#records{margin:1rem auto;max-width:23rem;text-align:left}
+#records div{display:flex;justify-content:space-between;gap:.5rem;padding:.6rem .85rem;border-bottom:1px solid #cee6dc}
+#records div:first-child{background:#eff9f4;border-radius:.75rem;color:#12644e}
+#records dd{margin:0;text-align:right}
+#feedback{min-height:2em;margin:.6rem 0;color:#1c5e4b}
+details{border-top:1px solid #cee6dc;padding-top:.75rem}
+summary{cursor:pointer;width:fit-content;margin:auto;padding:.3rem .6rem}
+#blocks{display:grid;grid-template-columns:repeat(2,minmax(0,14rem));justify-content:center;align-items:start;gap:.55rem;margin:.85rem auto}
+#blocks .group{width:100%}
+#source,#take{min-width:0}
+#ones{margin-top:.4rem}
+#take{padding:.3rem;border:2px dashed #548572;border-radius:.7rem;background:#eff9f4}
+#take.active{background:#d1ebdd;border-color:#12644e}
+#taken{border:0;padding:.25rem 0}
+button.block{border:0;min-height:0;padding:0;width:100%;touch-action:none;user-select:none;cursor:grab}
+button.block:hover{background:#2c7b66}
+button.block:disabled{opacity:1;cursor:default}
+#taken button{cursor:pointer}
+.dragged{position:fixed;z-index:2;pointer-events:none;width:2.3rem;transform:translate(-50%,-50%);box-shadow:0 3px 8px #163e3560}
+.group{display:grid;grid-template-columns:repeat(5, minmax(0,1fr));gap:.2rem;padding:.4rem;border:2px solid #a8cdbf;border-radius:.7rem;width:min(100%,13rem)}
+.block{border-radius:.28rem;aspect-ratio:1;background:#3b957c;color:#173c34;display:grid;place-items:center;font-size:1.05rem}
+.block.extra{background:#ffce6a}
+.block.gone{background:#f0f1f1;border:1px dashed #859590}
+.block.empty{background:#edf6f2}
+@media(max-width:480px){#keys{grid-template-columns:repeat(3,1fr);max-width:17rem;margin-inline:auto}}
+</style>
+</head>
+<body>
+<header><p>1ねんせいの さんすう</p><h1>10から ひこう！</h1></header>
+<main>
+<section id="menu">
+<h2>くりさがりの ある ひきざん</h2>
+<p>10の まとまりから ひいてみよう。</p>
+<div class="menu">
+<button id="practice" class="primary">れんしゅう</button>
+<button id="challenge">タイムアタック（20もん）</button>
+</div>
+<p>タイムアタックは、20もん せいかいするまでの じかんを はかるよ。<br>1もん まちがえると おしまい。</p>
+</section>
+<section id="game" hidden aria-label="もんだい">
+<div class="toolbar"><span id="progress"></span><button id="home">はじめに もどる</button></div>
+<h2 class="equation" id="equation" tabindex="-1"><span id="expression"></span> <span id="blank">？</span></h2>
+<p>□に はいる かずを えらぼう。</p>
+<div id="keys" role="group" aria-label="こたえを えらぶ"></div>
+<p id="feedback" role="status"></p>
+<button id="next" class="primary" hidden>つぎの もんだい</button>
+<details id="hint">
+<summary>ブロックで ヒント</summary>
+<div id="blocks">
+<div id="source">
+<div>10の まとまり</div>
+<div id="ten" class="group" role="group" aria-label="10の まとまり"></div>
+<div id="ones" class="group" aria-hidden="true"></div>
+</div>
+<div id="take">
+<div id="takeLabel">ひく</div>
+<div id="taken" class="group" role="group" aria-labelledby="takeLabel"></div>
+</div>
+</div>
+<p id="hintText" aria-live="polite"></p>
+<button id="resetBlocks" disabled>ぜんぶ もどす</button>
+</details>
+</section>
+<section id="result" hidden>
+<h2 id="resultTitle" tabindex="-1"></h2>
+<p id="resultText"></p>
+<dl id="records" hidden>
+<div><dt>タイム</dt><dd id="currentTime"></dd></div>
+<div><dt>ベストきろく</dt><dd id="bestTime"></dd></div>
+<div><dt>まえのきろく</dt><dd id="previousTime"></dd></div>
+</dl>
+<div class="menu">
+<button id="retry" class="primary">もういちど</button>
+<button id="back">はじめに もどる</button>
+</div>
+</section>
+</main>
+<script>
+const get = id => document.getElementById(id);
+const problems = [];
+for (let a = 11; a <= 18; a++) {
+  for (let b = a - 9; b <= 9; b++) problems.push([a,b]);
+}
+let mode, deck, question, start, a, b, solved;
+const removed = new Set();
+let drag;
+let suppressClick = false;
+const keys = Array.from({length:9}, (_, i) => {
+  const button = document.createElement('button');
+  button.textContent = i + 1;
+  button.addEventListener('click', () => answer(i + 1));
+  get('keys').append(button);
+  return button;
+});
+function show(screen) {
+  for (const id of ['menu','game','result']) get(id).hidden = id !== screen;
+}
+function shuffle() {
+  const cards = [...problems];
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i],cards[j]] = [cards[j],cards[i]];
+  }
+  return cards;
+}
+function begin(selected) {
+  mode = selected;
+  deck = shuffle();
+  if (mode === 'practice') deck = [[13,8], ...deck.filter(([x,y]) => x !== 13 || y !== 8)];
+  question = 1;
+  start = performance.now();
+  show('game');
+  next();
+}
+function next() {
+  if (!deck.length) deck = shuffle().filter(([x,y]) => x !== a || y !== b);
+  [a,b] = deck.shift();
+  solved = false;
+  clearDrag();
+  removed.clear();
+  get('progress').textContent = mode === 'challenge' ? question + ' / 20 もん' : question + ' もんめ';
+  get('expression').textContent = a + ' − ' + b + ' ＝';
+  get('blank').textContent = '？';
+  get('feedback').textContent = '';
+  get('next').hidden = true;
+  get('hint').hidden = mode === 'challenge';
+  get('hint').open = false;
+  keys.forEach(button => button.disabled = false);
+  renderBlocks();
+  get('equation').focus();
+}
+function renderBlocks(focusId) {
+  const makeCell = (style = '') => {
+    const cell = document.createElement('span');
+    cell.className = ('block ' + style).trim();
+    cell.setAttribute('aria-hidden', 'true');
+    return cell;
+  };
+  const makeButton = (index, inTarget) => {
+    const button = document.createElement('button');
+    button.className = 'block';
+    button.id = (inTarget ? 'taken-' : 'ten-') + index;
+    button.setAttribute('aria-label', (index + 1) + 'ばんの ブロックを ' + (inTarget ? 'もどす' : 'ひく'));
+    button.onclick = event => {
+      if (!inTarget && event.detail && suppressClick) return;
+      moveBlock(index, inTarget);
+    };
+    if (!inTarget) {
+      button.disabled = removed.size === b;
+      button.onpointerdown = event => startDrag(event, button, index);
+      button.onpointermove = moveDrag;
+      button.onpointerup = endDrag;
+      button.onlostpointercapture = button.onpointercancel = event => {
+        if (drag?.pointer === event.pointerId) clearDrag();
+      };
+    }
+    return button;
+  };
+  get('ten').replaceChildren(...Array.from({length:10}, (_, i) =>
+    removed.has(i) ? makeCell('gone') : makeButton(i, false)));
+  const ones = a - 10;
+  get('ones').replaceChildren(...Array.from({length:Math.ceil(ones / 5) * 5}, (_, i) =>
+    makeCell(i < ones ? 'extra' : 'empty')));
+  const taken = [...removed].map(index => makeButton(index, true));
+  while (taken.length < b) taken.push(makeCell('gone'));
+  get('taken').replaceChildren(...taken);
+  get('takeLabel').textContent = 'ひく ' + removed.size + ' / ' + b;
+  get('hintText').textContent = removed.size === b
+    ? '10から ' + b + 'を ひくと ' + (10 - b) + '。のこった ' + (10 - b) + 'と ' + ones + 'を あわせると？'
+    : a + 'は 10と ' + ones + '。みどりの ブロックを「ひく」へ うごかそう。タップでも うごくよ。';
+  get('resetBlocks').disabled = removed.size === 0;
+  if (focusId) get(focusId)?.focus({preventScroll:true});
+}
+function moveBlock(index, inTarget) {
+  if (inTarget) removed.delete(index);
+  else {
+    if (removed.size >= b) return;
+    removed.add(index);
+  }
+  renderBlocks((inTarget ? 'ten-' : 'taken-') + index);
+}
+function startDrag(event, button, index) {
+  if (!event.isPrimary || event.button !== 0 || drag) return;
+  suppressClick = false;
+  drag = {pointer:event.pointerId, index, x:event.clientX, y:event.clientY};
+  button.setPointerCapture(event.pointerId);
+}
+function overTarget(event) {
+  const {left,right,top,bottom} = get('take').getBoundingClientRect();
+  return event.clientX >= left && event.clientX <= right &&
+    event.clientY >= top && event.clientY <= bottom;
+}
+function moveDrag(event) {
+  if (drag?.pointer !== event.pointerId) return;
+  if (!drag.ghost) {
+    if (Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 6) return;
+    drag.ghost = document.createElement('span');
+    drag.ghost.className = 'block dragged';
+    drag.ghost.setAttribute('aria-hidden', 'true');
+    document.body.append(drag.ghost);
+    suppressClick = true;
+  }
+  drag.ghost.style.left = event.clientX + 'px';
+  drag.ghost.style.top = event.clientY + 'px';
+  get('take').classList.toggle('active', overTarget(event));
+}
+function clearDrag() {
+  drag?.ghost?.remove();
+  drag = undefined;
+  get('take').classList.remove('active');
+}
+function endDrag(event) {
+  if (drag?.pointer !== event.pointerId) return;
+  const {index,ghost} = drag;
+  const dropped = ghost && overTarget(event);
+  clearDrag();
+  if (dropped) moveBlock(index, false);
+}
+function answer(value) {
+  if (solved || get('game').hidden) return;
+  if (value !== a - b) {
+    if (mode === 'challenge') finish(false);
+    else get('feedback').textContent = 'もういちど かんがえてみよう。';
+    return;
+  }
+  solved = true;
+  get('blank').textContent = value;
+  if (mode === 'challenge') {
+    if (question === 20) finish(true);
+    else { question++; next(); }
+    return;
+  }
+  keys.forEach(button => button.disabled = true);
+  get('feedback').textContent = 'せいかい！';
+  get('next').hidden = false;
+  get('next').focus();
+}
+const recordsKey = 'hikizan-blocks.challenge-records';
+let records = {best:null, previous:null};
+function formatTime(milliseconds) {
+  if (milliseconds === null) return 'まだ ないよ';
+  const seconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(seconds / 60);
+  return (minutes ? minutes + 'ふん' : '') + (seconds % 60) + 'びょう';
+}
+function showRecords(elapsed) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(recordsKey));
+    if (saved && [saved.best, saved.previous].every(time => Number.isFinite(time) && time >= 0)) {
+      records = saved;
+    }
+  } catch {
+    // Keep the records for this page when browser storage is unavailable.
+  }
+  const {best, previous} = records;
+  records = {best:best === null ? elapsed : Math.min(best, elapsed), previous:elapsed};
+  get('currentTime').textContent = formatTime(elapsed);
+  get('bestTime').textContent = formatTime(records.best);
+  get('previousTime').textContent = formatTime(previous);
+  try {
+    localStorage.setItem(recordsKey, JSON.stringify(records));
+  } catch {
+    // The result can still be shown without saving it across page loads.
+  }
+}
+function finish(won) {
+  get('resultTitle').textContent = won ? 'おめでとう！' : 'チャレンジ おしまい';
+  get('resultText').textContent = won ? '20もん せいかい！' :
+    (question - 1) + 'もん せいかい。' + a + ' − ' + b + ' ＝ ' + (a - b) + ' だよ。';
+  get('records').hidden = !won;
+  if (won) showRecords(performance.now() - start);
+  show('result');
+  get('resultTitle').focus();
+}
+function home() {
+  show('menu');
+  get('practice').focus();
+}
+get('practice').onclick = () => begin('practice');
+get('challenge').onclick = () => begin('challenge');
+get('retry').onclick = () => begin(mode);
+get('home').onclick = get('back').onclick = home;
+get('next').onclick = () => { question++; next(); };
+get('resetBlocks').onclick = () => {
+  removed.clear();
+  renderBlocks('ten-0');
+};
+</script>
+</body>
+</html>
