@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#e7f8e9">
+<title>ことばのもり｜しりとり</title>
+<style>
+:root{font-family:"Hiragino Maru Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:#282047;background:#f4f0ff;font-size:16px;font-weight:700}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 20%,#fff 0,transparent 62%),#f4f0ff}
+button{font:inherit;cursor:pointer}
+button:focus-visible,summary:focus-visible{outline:3px solid #4226ae;outline-offset:4px}
+.wrap{width:min(100% - 32px,800px);margin:auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:24px 0;color:#49318a}
+.brand{display:flex;align-items:center;gap:10px;font-size:1.05rem}
+.mark{display:grid;place-items:center;background:#dfd3ff;border-radius:13px;width:40px;height:40px;font-size:1.35rem}
+.reset{border:2px solid #dfd3f6;border-radius:100px;background:#fff;color:#50368b;padding:10px 15px}
+.hero{text-align:center;padding:18px 0 25px}
+h1{margin:0;font-size:clamp(2.7rem,8vw,4.75rem);line-height:1.18;letter-spacing:.055em;color:#5030a4}
+.hero p{margin:10px 0 0;color:#5f527c}
+.board{background:#fff;border:2px solid #e7dcfb;border-radius:30px;box-shadow:0 8px 0 #e8def8,0 18px 40px #5030a414;padding:clamp(16px,4vw,32px)}
+.current{background:#efe7ff;border-radius:20px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;text-align:center;gap:12px;padding:18px 10px}
+.caption{display:block;color:#654891;margin-bottom:8px;font-size:.94rem}
+.word,.next{font-size:clamp(1.45rem,5vw,2.45rem);line-height:1.3}
+.next{display:inline-grid;place-items:center;background:#6d46cc;color:white;min-width:1.65em;height:1.55em;border-radius:12px}
+.connector{color:#7757ad;font-size:1.35rem}
+.answer{margin-top:24px}
+.answer label{display:block;margin-bottom:8px}
+.answer-row{display:flex;gap:8px}
+.answer input{min-width:0;flex:1;padding:10px 12px;border:2px solid #cbb7f0;border-radius:12px;color:inherit;font:inherit;font-size:1.15rem}
+.answer button{border:0;border-radius:12px;background:#6d46cc;color:#fff;padding:10px 14px}
+.answer input:focus-visible{outline:3px solid #4226ae;outline-offset:2px}
+h2{font-size:clamp(1.05rem,4vw,1.42rem);margin:24px 0 14px;text-align:center}
+.level{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.level button[aria-pressed="true"],.kana button[aria-pressed="true"]{background:#6d46cc;border-color:#6d46cc;color:#fff}
+.tools{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:16px;color:#554479}
+.mission{padding:12px 16px;border-radius:14px;background:#fff1c7;color:#654306;line-height:1.6}
+dialog{width:min(92%,590px);max-height:85vh;border:2px solid #e7dcfb;border-radius:22px;padding:20px;color:inherit;background:#fff;overflow:auto}
+dialog::backdrop{background:#28204799}
+.picker-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.picker-head h2{margin:0}
+.kana{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:16px 0}
+.kana button{min-height:42px;padding:4px;border-radius:9px;border:1px solid #dfd3f6;background:#f4f0ff;color:inherit}
+.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+figure.choice{margin:0;text-align:center;box-shadow:none;cursor:default}
+.choice{display:grid;justify-items:center;align-content:center;gap:6px;min-height:104px;padding:9px 4px;border:2px solid var(--edge);border-radius:18px;background:var(--fill);color:#282047;box-shadow:0 4px 0 var(--edge);font-size:clamp(1rem,4.4vw,1.5rem);overflow-wrap:anywhere}
+.choice:nth-child(1){--fill:#fff4d9;--edge:#efce7d}
+.choice:nth-child(2){--fill:#e5f8ec;--edge:#a7dcbc}
+.choice:nth-child(3){--fill:#ffecf2;--edge:#edb6cc}
+.choice:hover:not(:disabled){filter:brightness(.97);transform:translateY(-2px)}
+.choice:disabled{opacity:.48;cursor:default}
+.icon{font-size:clamp(1.65rem,5vw,2.45rem)}
+.notice{min-height:2.7em;margin:16px 0 0;text-align:center;color:#604387}
+.trail{margin:22px 0 0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;list-style:none}
+.trail li{background:#eae0fa;color:#50368b;padding:6px 12px;border-radius:100px}
+details{text-align:center;color:#554479;margin:24px auto 32px}
+summary{cursor:pointer;width:fit-content;margin:auto;padding:8px}
+details p{line-height:1.8;margin:6px 0 0}
+@media(max-width:400px){.choices{gap:7px}.choice{min-height:87px}.current{gap:5px}.word{font-size:1.3rem}}
+body{background:radial-gradient(circle at 15% 15%,#fff1b9 0,transparent 22%),radial-gradient(circle at 83% 22%,#ffdfea 0,transparent 25%),linear-gradient(165deg,#e8f9ec,#f6edff 80%);color:#29354c}
+header{color:#27573f}
+.mark{background:#cdead4}
+.hero{padding-top:6px}
+.mascot{display:block;font-size:clamp(1.7rem,6vw,2.8rem);letter-spacing:.12em;margin-bottom:8px}
+h1{color:#315b46;text-shadow:0 3px #d7f2c9}
+.hero p{color:#4e566a}
+.board{border-color:#cce8d2;box-shadow:0 8px 0 #cde8d5,0 18px 40px #395c4419}
+.current{background:#e6f6ea}
+.caption,.connector{color:#3c6954}
+.next{background:#34734f}
+.answer input{border-color:#acd5ba;background:#fcfffc}
+.answer button{background:#34734f}
+.reset{min-height:44px}
+.kana button{min-height:44px}
+@media(max-width:400px){header{padding-block:15px}.answer button{padding-inline:10px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="brand"><span class="mark" aria-hidden="true">🌱</span>ことばのもり</div>
+<button class="reset" id="reset" type="button">はじめから</button>
+</header>
+<main>
+<div class="hero"><span class="mascot" aria-hidden="true">🌳 🐿️ 🍄</span><h1>しりとり</h1><p>ことばの さいごの もじで つなごう！</p></div>
+<div id="levels" class="level" role="group" aria-label="レベルを えらぼう">
+<span>レベル</span>
+<button class="reset" type="button" data-goal="10" aria-pressed="true">10かい</button>
+<button class="reset" type="button" data-goal="20" aria-pressed="false">20かい</button>
+<button class="reset" type="button" data-goal="30" aria-pressed="false">30かい</button>
+</div>
+<section class="board" aria-labelledby="question">
+<div class="current">
+<div><span class="caption">まえの ことば</span><div id="current" class="word"></div></div>
+<span class="connector" aria-hidden="true">→</span>
+<div><span class="caption">つぎの もじ</span><span id="next" class="next"></span></div>
+</div>
+<h2 id="question"></h2>
+<p id="mission" class="mission" role="status" hidden></p>
+<form id="answer" class="answer">
+<label for="word-input">ことばを いれてね</label>
+<div class="answer-row">
+<input id="word-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="24">
+<button type="submit">こたえる</button>
+</div>
+</form>
+<div class="tools">
+<button id="open-picker" type="button" class="reset">えをえらぶ</button>
+<span id="progress"></span>
+</div>
+<p id="notice" class="notice" role="status"></p>
+</section>
+<ol id="trail" class="trail" aria-label="つないだ ことば"></ol>
+<details><summary>あそびかた</summary><p>はじめは「り」から。<br>まえの ことばの さいごの もじから はじまる<br>ことばを じぶんで いれよう。<br>えを みると ことばの ヒントが あるよ。<br>おなじ ことばは いちどだけ。<br>「ん」で おわったら おしまい。</p></details>
+<dialog id="picker" aria-labelledby="picker-title">
+<div class="picker-head"><h2 id="picker-title">えをえらぶ</h2><form method="dialog"><button type="submit" class="reset">とじる</button></form></div>
+<div id="kana" class="kana" role="group" aria-label="ごじゅうおん"></div>
+<p id="picture-label" aria-live="polite"></p>
+<div id="choices" class="choices"></div>
+</dialog>
+</main>
+</div>
+<script>
+const words = [
+  ['りんご','🍎'], ['ごりら','🦍'], ['ごま','🌱'], ['ごはん','🍚'],
+  ['らくだ','🐪'], ['らっぱ','🎺'], ['だるま','🔴'], ['だいこん','🥬'],
+  ['まくら','🛏️'], ['まめ','🫘'], ['ぱんだ','🐼'], ['ぱん','🍞'],
+  ['めだか','🐟'], ['めがね','👓'], ['かさ','☂️'], ['かめ','🐢'],
+  ['かに','🦀'], ['かばん','🎒'], ['ねこ','🐈'], ['ねずみ','🐭'],
+  ['こあら','🐨'], ['こま','🪀'], ['みかん','🍊'], ['みみ','👂'],
+  ['みず','💧'], ['さる','🐒'], ['さくら','🌸'], ['さかな','🐟'],
+  ['にじ','🌈'], ['にわとり','🐔'], ['じてんしゃ','🚲'], ['しゃしん','📷'],
+  ['やさい','🥦'], ['とまと','🍅'], ['とり','🐦'], ['りす','🐿️'],
+  ['すいか','🍉'], ['すずめ','🐦'], ['ずぼん','👖'], ['ずかん','📚'],
+  ['るり','💎'], ['なす','🍆'], ['なべ','🍲'], ['べんとう','🍱'],
+  ['うさぎ','🐇'], ['うま','🐴'], ['ぎゅうにゅう','🥛'], ['いぬ','🐕'],
+  ['ぬの','🧵'], ['のり','🍙'],
+  ['あひる','🦆'], ['あめ','🍬'], ['えんぴつ','✏️'], ['えび','🦐'],
+  ['おにぎり','🍙'], ['おに','👹'], ['おたまじゃくし','🐸'], ['きつね','🦊'],
+  ['きのこ','🍄'], ['くま','🐻'], ['くつ','👟'], ['けいと','🧶'],
+  ['けむし','🐛'], ['せみ','🪲'], ['せっけん','🧼'], ['そら','🌤️'],
+  ['そり','🛷'], ['たぬき','🦝'], ['たこ','🐙'], ['ちょうちょ','🦋'],
+  ['ちきゅう','🌏'], ['つき','🌙'], ['つくえ','🪑'], ['て','✋'],
+  ['てぶくろ','🧤'], ['ぬいぐるみ','🧸'], ['のこぎり','🪚'], ['はな','🌷'],
+  ['はさみ','✂️'], ['ひつじ','🐑'], ['ひよこ','🐤'], ['ふね','⛵'],
+  ['ふくろう','🦉'], ['へび','🐍'], ['へるめっと','⛑️'], ['ほし','⭐'],
+  ['ほうき','🧹'], ['むし','🐛'], ['むぎ','🌾'], ['もも','🍑'],
+  ['もぐら','🐾'], ['ゆき','❄️'], ['ゆび','☝️'], ['よっと','⛵'],
+  ['ようふく','👕'], ['るーぺ','🔍'], ['るびー','💎'],
+  ['れもん','🍋'], ['れいぞうこ','🧊'], ['ろうそく','🕯️'], ['ろけっと','🚀'],
+  ['わに','🐊'], ['わたあめ','🍭'], ['がちょう','🪿'], ['がっき','🎹'],
+  ['ぎたー','🎸'], ['ぐみ','🍬'], ['げた','🩴'], ['ざりがに','🦞'],
+  ['ぞう','🐘'], ['ぜりー','🍮'], ['でんしゃ','🚃'], ['どんぐり','🌰'],
+  ['ばなな','🍌'], ['びん','🫙'], ['ぶた','🐷'], ['ぶどう','🍇'],
+  ['ぼうし','🧢'], ['ぴあの','🎹'], ['ぷりん','🍮'], ['ぺんぎん','🐧'],
+  ['ぽすと','📮'], ['だいず','🫘'], ['ずわいがに','🦀'], ['りく','🏝️'], ['まつ','🌲']
+];
+const get = (id) => document.getElementById(id);
+const notice = get('notice');
+const answer = get('answer');
+const input = get('word-input');
+const picker = get('picker');
+const kana = get('kana');
+const levels = [...get('levels').querySelectorAll('button')];
+const animals = new Set(('ごりら らくだ ぱんだ めだか かめ かに ねこ ねずみ こあら さる さかな にわとり とり りす すずめ うさぎ うま いぬ あひる えび おたまじゃくし きつね くま けむし せみ たぬき たこ ちょうちょ ひつじ ひよこ ふくろう へび むし もぐら わに がちょう ざりがに ずわいがに ぞう ぶた ぺんぎん').split(' '));
+const pictures = new Map(words);
+const rows = ['あいうえお','かきくけこ','さしすせそ','たちつてと','なにぬねの',
+  'はひふへほ','まみむめも','や ゆ よ','らりるれろ','わ を ん',
+  'がぎぐげご','ざじずぜぞ','だぢづでど','ばびぶべぼ','ぱぴぷぺぽ'];
+let goal = 10;
+let trail;
+let mission;
+let missionTurn;
+let missionCount;
+
+function lastLetter(word) {
+  const smallKana = {ぁ:'あ',ぃ:'い',ぅ:'う',ぇ:'え',ぉ:'お',っ:'つ',ゃ:'や',ゅ:'ゆ',ょ:'よ',ゎ:'わ'};
+  const last = word.replace(/ー+$/u, '').at(-1);
+  return smallKana[last] ?? last;
+}
+
+function nextLetter() {
+  return trail.length ? lastLetter(trail.at(-1)) : 'り';
+}
+
+function showPictures(letter) {
+  for (const button of kana.querySelectorAll('button')) {
+    button.setAttribute('aria-pressed', String(button.textContent === letter));
+  }
+  const matches = words.filter(([word]) => word.startsWith(letter) && lastLetter(word) !== 'ん');
+  get('picture-label').textContent = matches.length ? `「${letter}」から はじまる ことば`
+    : letter === 'ん' ? '「ん」で おわると しりとりは おしまい。'
+    : `「${letter}」から はじまる えは ないよ。`;
+  get('choices').replaceChildren(...matches.map(([word, picture]) => {
+    const card = document.createElement('figure');
+    card.className = 'choice';
+    const icon = document.createElement('span');
+    icon.className = 'icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = picture;
+    const label = document.createElement('figcaption');
+    label.textContent = word;
+    card.append(icon, label);
+    return card;
+  }));
+}
+
+for (const letter of rows.join('')) {
+  if (letter === ' ') {
+    kana.append(document.createElement('span'));
+  } else {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = letter;
+    button.addEventListener('click', () => showPictures(letter));
+    kana.append(button);
+  }
+}
+get('open-picker').addEventListener('click', () => {
+  showPictures(nextLetter());
+  picker.showModal();
+});
+
+function planMission() {
+  const next = nextLetter();
+  const candidates = words.map(([word]) => word).filter((word) =>
+    word.startsWith(next) && lastLetter(word) !== 'ん' && !trail.includes(word));
+  const lengths = [...new Set(candidates.map((word) => [...word].length))];
+  const options = lengths.map((length) => ({
+    label: `${length}もじの ことば`, matches: (word) => [...word].length === length
+  }));
+  if (candidates.some((word) => animals.has(word))) {
+    options.push({label: 'どうぶつの なまえ', matches: (word) => animals.has(word)});
+  }
+  return options[Math.floor(Math.random() * options.length)];
+}
+
+function render() {
+  const word = trail.at(-1);
+  const next = nextLetter();
+  const finished = next === 'ん' || trail.length === goal;
+  const icon = pictures.get(word);
+  get('current').textContent = icon ? `${icon} ${word}` : word ?? 'しりとり';
+  get('next').textContent = next;
+  get('progress').textContent = `${trail.length} / ${goal} かい`;
+  get('trail').replaceChildren(...trail.map((name) => {
+    const item = document.createElement('li');
+    item.textContent = name;
+    return item;
+  }));
+  answer.hidden = finished;
+  get('open-picker').hidden = finished;
+  get('mission').hidden = !mission || finished;
+  get('mission').textContent = mission ? `⭐ ミッション　${mission.label}に チャレンジ！` : '';
+  get('question').textContent = next === 'ん' ? 'おしまい'
+    : finished ? '🎉 クリア！' : `「${next}」から はじまる ことばを いれてね`;
+}
+
+function start(event) {
+  trail = [];
+  mission = null;
+  missionCount = 0;
+  missionTurn = 2 + Math.floor(Math.random() * 3);
+  input.value = '';
+  notice.textContent = 'さいしょは「り」から スタート！';
+  render();
+  if (event) input.focus();
+}
+
+function submitWord(word) {
+  const next = nextLetter();
+  if (!/^[ぁ-ゖ][ぁ-ゖー]*$/u.test(word)) {
+    notice.textContent = 'ひらがなで ことばを いれてね。';
+  } else if (!word.startsWith(next)) {
+    notice.textContent = `「${word}」は「${word[0]}」から はじまるよ。「${next}」を さがそう。`;
+  } else if (trail.includes(word)) {
+    notice.textContent = `「${word}」は もう つかったよ。`;
+  } else {
+    const endsGame = lastLetter(word) === 'ん';
+    const completed = !endsGame && mission?.matches(word);
+    if (completed) missionCount++;
+    trail.push(word);
+    input.value = '';
+    mission = null;
+    if (!endsGame && trail.length < goal && trail.length >= missionTurn) {
+      mission = planMission();
+      missionTurn = trail.length + (mission ? 3 + Math.floor(Math.random() * 4) : 1);
+    }
+    notice.textContent = endsGame ? '「ん」で おわったね。「はじめから」で もういちど！'
+      : trail.length === goal ? `${goal}かい つないだよ！ ミッション ${missionCount}こ クリア！`
+      : completed ? '⭐ ミッション クリア！' : `${trail.length}こ つながったよ！`;
+    render();
+  }
+}
+
+answer.addEventListener('submit', (event) => {
+  event.preventDefault();
+  if (answer.hidden) return;
+  const word = input.value.trim().normalize('NFKC').replace(/[ァ-ヶ]/gu,
+    (letter) => String.fromCharCode(letter.charCodeAt(0) - 0x60));
+  submitWord(word);
+  if (!answer.hidden) input.focus();
+  else get('reset').focus();
+});
+
+for (const button of levels) {
+  button.addEventListener('click', (event) => {
+    const selected = Number(button.dataset.goal);
+    if (selected === goal) return;
+    goal = selected;
+    for (const level of levels) level.setAttribute('aria-pressed', String(level === button));
+    start(event);
+  });
+}
+get('reset').addEventListener('click', start);
+start();
+</script>
+</body>
+</html>
