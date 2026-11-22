@@ -115,7 +115,7 @@ h1{color:#315b46;text-shadow:0 3px #d7f2c9}
 <details><summary>あそびかた</summary><p>はじめは「り」から。<br>まえの ことばの さいごの もじから はじまる<br>ものや いきものなどの なまえを じぶんで いれよう。<br>えを みると ことばの ヒントが あるよ。<br>おなじ ことばは いちどだけ。<br>「ん」で おわったら おしまい。</p></details>
 <details><summary>じしょについて</summary><p>ことばの はんていには、
 <a href="https://www.edrdg.org/jmdict/j_jmdict.html">EDRDG の JMdict</a> の よく つかわれる なまえから、
-りゃくごなどを のぞいた よみ（2026年11月16日版、ひらがなに へんかん）を つかっています。<br>
+りゃくごなどを のぞいた よみ（2026年11月16日版、ひらがなに へんかん）と、みぢかな ことばを つかっています。<br>
 <a href="https://www.edrdg.org/edrdg/licence.html">EDRDG の利用条件</a>・
 <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></p></details>
 <dialog id="picker" aria-labelledby="picker-title">
@@ -340,7 +340,14 @@ const kana = get('kana');
 const levels = [...get('levels').querySelectorAll('button')];
 const animals = new Set(('ごりら らくだ ぱんだ めだか かめ かに ねこ ねずみ こあら さる さかな にわとり とり りす すずめ うさぎ うま いぬ あひる えび おたまじゃくし きつね くま けむし せみ たぬき たこ ちょうちょ ひつじ ひよこ ふくろう へび むし もぐら わに がちょう ざりがに ずわいがに ぞう ぶた ぺんぎん').split(' '));
 // JMdict readings (EDRDG, CC BY-SA 4.0), extracted and normalized.
-const dictionary = new Set(document.getElementById('dictionary').textContent.trim().split(/\s+/u));
+const classroomWords = [
+  'りんごじゅーす', 'りんごあめ', 'りんごじゃむ', 'りんごぱい',
+  'みかんじゅーす', 'おれんじじゅーす', 'ぶどうじゅーす', 'とまとじゅーす', 'やさいじゅーす'
+];
+const dictionary = new Set([
+  ...document.getElementById('dictionary').textContent.trim().split(/\s+/u),
+  ...classroomWords
+]);
 const pictures = new Map(words);
 const rows = ['あいうえお','かきくけこ','さしすせそ','たちつてと','なにぬねの',
   'はひふへほ','まみむめも','や ゆ よ','らりるれろ','わ を ん',
